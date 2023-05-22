@@ -1,17 +1,35 @@
 import { ColorModeScript } from '@chakra-ui/react';
 import React, { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+
+// Pages
+import Root from "./routes/root";
+import ErrorPage from "./error-page";
+
+import { ChakraProvider } from '@chakra-ui/react'
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+  },
+]);
 
 root.render(
   <StrictMode>
-    <ColorModeScript />
-    <App />
+    <ChakraProvider>
+      <RouterProvider router={router} />
+      <ColorModeScript />
+    </ChakraProvider>
   </StrictMode>
 );
 
