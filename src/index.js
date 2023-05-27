@@ -11,25 +11,42 @@ import {
 // Pages
 import Root from "./routes/root";
 import ErrorPage from "./error-page";
+import Parties from "./routes/parties";
+import Login from './components/Login';
 
 import { ChakraProvider } from '@chakra-ui/react'
+import { AuthProvider } from './context/AuthProvider';
+import RequireAuth from './components/RequireAuth';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: (<RequireAuth allowedRoles={["User"]}><Root /></RequireAuth>),
     errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/parties",
+        element: (<RequireAuth allowedRoles={["User"]}><Parties /></RequireAuth>),
+      }
+    ]
   },
+  {
+    path: "/login",
+    element: <Login />,
+    errorElement: <ErrorPage />,
+  }
 ]);
 
 root.render(
   <StrictMode>
-    <ChakraProvider>
-      <RouterProvider router={router} />
-      <ColorModeScript />
-    </ChakraProvider>
+    <AuthProvider>
+      <ChakraProvider>
+        <RouterProvider router={router} />
+        <ColorModeScript />
+      </ChakraProvider>
+    </AuthProvider>
   </StrictMode>
 );
 

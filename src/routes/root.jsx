@@ -32,12 +32,16 @@ import {
   FiMail
 } from 'react-icons/fi';
 import { ColorModeSwitcher } from './ColorModeSwitcher';
+import { Link as RouterLink, Outlet, useNavigate } from 'react-router-dom';
+import { useContext } from "react";
+import AuthContext from "../context/AuthProvider";
+import useAuth from "../hooks/useAuth";
 
 const LinkItems = [
-  { name: 'Your parties', icon: FiCalendar },
-  { name: 'Joined parties', icon: FiUserPlus },
-  { name: 'Messages', icon: FiMail },
-  { name: 'Settings', icon: FiSettings }
+  { name: 'Your parties', icon: FiCalendar, url: "/parties" },
+  { name: 'Joined parties', icon: FiUserPlus, url: "/parties/joined"  },
+  { name: 'Messages', icon: FiMail, url: "/messages" },
+  { name: 'Settings', icon: FiSettings, url: "/settings" }
 ];
 
 export default function Root({children}) {
@@ -64,7 +68,7 @@ export default function Root({children}) {
         {/* mobilenav */}
         <MobileNav onOpen={onOpen} />
         <Box ml={{ base: 0, md: 60 }} p="4">
-            {children}
+           <Outlet />
         </Box>
         </Box>
     );
@@ -88,7 +92,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
           <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
         </Flex>
         {LinkItems.map((link) => (
-          <NavItem key={link.name} icon={link.icon}>
+          <NavItem key={link.name} icon={link.icon} url={link.url} type={RouterLink}>
             {link.name}
           </NavItem>
         ))}
@@ -96,9 +100,9 @@ const SidebarContent = ({ onClose, ...rest }) => {
     );
   };
 
-const NavItem = ({ icon, children, ...rest }) => {
+const NavItem = ({ icon, url, type, children, ...rest }) => {
     return (
-      <Link href="#" style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
+      <Link as={RouterLink} to={url} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
         <Flex
           align="center"
           p="4"
@@ -128,6 +132,18 @@ const NavItem = ({ icon, children, ...rest }) => {
   };
 
 const MobileNav = ({ onOpen, ...rest }) => {
+    const { auth } = useAuth();
+    console.log(auth);
+    const { setAuth } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const logout = async () => {
+        // if used in more components, this should be in context 
+        // axios to /logout endpoint 
+        setAuth({});
+        navigate('/login');
+    }
+
 return (
     <Flex
     ml={{ base: 0, md: 60 }}
@@ -180,9 +196,9 @@ return (
                 alignItems="flex-start"
                 spacing="1px"
                 ml="2">
-                <Text fontSize="sm">Justina Clark</Text>
+                <Text fontSize="sm">{auth?.user ?? auth?.user}</Text>
                 <Text fontSize="xs" color="gray.600">
-                    Admin
+                    {auth?.role ?? auth?.role}
                 </Text>
                 </VStack>
                 <Box display={{ base: 'none', md: 'flex' }}>
@@ -195,9 +211,8 @@ return (
             borderColor={useColorModeValue('gray.200', 'gray.700')}>
             <MenuItem>Profile</MenuItem>
             <MenuItem>Settings</MenuItem>
-            <MenuItem>Billing</MenuItem>
             <MenuDivider />
-            <MenuItem>Sign out</MenuItem>
+            <MenuItem onClick={logout}>Sign out</MenuItem>
             </MenuList>
         </Menu>
         </Flex>
