@@ -71,8 +71,9 @@ const Login = () => {
             const accessToken = response?.data?.jwtToken;
             const role = response?.data?.role;
             const email = response?.data?.email;
+            const userid = response?.data?.userid;
 
-            setAuth({ email, user, pwd, role, accessToken });
+            setAuth({ userid, email, user, pwd, role, accessToken });
             setUser('');
             setPwd('');
             navigate(from, { replace: true });
