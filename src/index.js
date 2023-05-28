@@ -14,9 +14,18 @@ import ErrorPage from "./error-page";
 import Parties from "./routes/parties";
 import Login from './components/Login';
 
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { AuthProvider } from './context/AuthProvider';
 import RequireAuth from './components/RequireAuth';
+
+// 2. Add your color mode config
+const config = {
+  initialColorMode: 'light',
+  useSystemColorMode: false,
+}
+
+// 3. extend the theme
+const theme = extendTheme({ config })
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
@@ -42,7 +51,7 @@ const router = createBrowserRouter([
 root.render(
   <StrictMode>
     <AuthProvider>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <RouterProvider router={router} />
         <ColorModeScript />
       </ChakraProvider>

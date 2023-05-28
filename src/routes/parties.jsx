@@ -10,7 +10,6 @@ import {
     Button,
     Link,
     Badge,
-    useColorModeValue,
     Divider,
     ModalOverlay,
     useDisclosure,
@@ -27,55 +26,47 @@ import {
     InputLeftElement,
     InputRightElement,
     InputLeftAddon,
-    Textarea
+    Textarea,
+    AlertDialog,
+    AlertDialogOverlay,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogCloseButton,
+    AlertDialogBody,
+    AlertDialogFooter,
+    IconButton,
+    SimpleGrid,
+    useColorModeValue 
 } from '@chakra-ui/react';
-import { CheckIcon } from '@chakra-ui/icons'
+import { CheckIcon, 
+    AddIcon } from '@chakra-ui/icons'
 
 import useAuth from '../hooks/useAuth';
-import { GetPartiesByUserid, UpdateParty } from '../context/actions/parties';
+import { GetPartiesByUserid, UpdateParty, CreateParty, DeleteParty } from '../context/actions/parties';
 import '../css/datepicker.css'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const Parties = () => {
-    
-    const OverlayOne = () => (
-        <ModalOverlay
-            bg='blackAlpha.300'
-            backdropFilter='blur(10px) hue-rotate(90deg)'
-        />
-    )
+import toast, { Toaster } from 'react-hot-toast';
 
-    const SaveParty = async () => {
-        let partyToUpdate = activeParty;
-        console.log(activeParty);
-        partyToUpdate.title = title !== null ? title : activeParty?.title;
-        partyToUpdate.description = description !== null ? description : activeParty?.description;
-        partyToUpdate.starts = startDate !== null ? startDate : activeParty?.starts;
-        partyToUpdate.ends = endDate !== null ? endDate : activeParty?.ends; 
-        partyToUpdate.budget = budget !== null ? budget : activeParty?.budget;
-        partyToUpdate.location = activeParty?.location;
-        await UpdateParty(partyToUpdate);
+const Parties = () => {
+
+    const RemoveParty = async () => {
+        const response = await DeleteParty(activeParty);
     }
 
+    const { auth } = useAuth();
     const [parties, setParties] = useState();
     const [activeParty, setActiveParty] = useState();
-    const { auth } = useAuth();
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const [overlay, setOverlay] = React.useState(<OverlayOne />)
+    const [openEditModal, setOpen] = useState(false);
 
-    // Active party
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
-    const [location, setLocation] = useState('');
-    const [budget, setBudget] = useState(0);
+    const { isOpen, onOpen, onClose } = useDisclosure()
+    const cancelRef = React.useRef()
 
     useEffect(() => {
         (async () => {
             const parties = await GetPartiesByUserid(auth?.userid);
-            setParties(parties);
+            setParties(parties.data);
         })();
         
         return () => {
@@ -86,28 +77,32 @@ const Parties = () => {
     return (
         <>
         <div id="party">
-        <div style={{margin: "2rem"}}>
-            <h1 style={{fontWeight: 700, fontSize: 32, marginBottom: "1rem"}}>Your parties</h1>
+        <div style={{marginLeft: "2rem"}}>
+            <Stack direction={'row'} mt={5} mb={4} spacing={3} alignItems={'center'}>
+                <Heading fontWeight={700} fontSize={28}>Your parties</Heading>
+                <AddModal />
+            </Stack>
+            <Divider />
+            <SimpleGrid mt={4} columns={[1,2,4]} spacing={4}>
             { parties?.length ? parties.map((party, id) => {
                 return <Box
+                key={id}
                 bg="white"
-                maxW={'320px'}
                 w={'full'}
-                boxShadow={'2xl'}
+                boxShadow={'1xl'}
                 rounded={'lg'}
                 p={6}>
-                <Heading fontSize={'2xl'} fontFamily={'body'}>
+                <Text fontWeight={600} color={'gray.500'} mb={1}>
+                    { `@${auth?.user}` }
+                </Text>
+                <Heading  fontSize={'1xl'} fontFamily={'body'} mt={4} mb={2}>
                     { party.title }
                 </Heading>
-                <Text fontWeight={600} color={'gray.500'} my={2} mb={4}>
-                    { auth?.user }
-                </Text>
-                <Divider />
-                <Text my={4}>
+                <Text >
                     { party.description }
                 </Text>
-                <Divider />
-                <Stack direction={'row'} my={3}>
+                <Divider mt={4} mb={2} />
+                <Stack my={4} direction={'row'} justifyContent={'space-between'}>
                     <Text>Starts</Text>
                     <Badge
                     px={2}
@@ -119,19 +114,30 @@ const Parties = () => {
                     { new Date(party.starts).toLocaleString() }
                     </Badge>
                 </Stack>
-                <Stack direction={'row'} my={3}>
-                <Text>Ends</Text>
-                <Badge
-                    px={2}
-                    py={1}
-                    bg="lightgray"
-                    color="black"
-                    fontWeight={'400'}>
-                    { new Date(party.ends).toLocaleString()  }
+                <Stack direction={'row'} my={3} justifyContent={'space-between'}>
+                    <Text>Ends</Text>
+                    <Badge
+                        px={2}
+                        py={1}
+                        bg="lightgray"
+                        color="black"
+                        fontWeight={'400'}>
+                        { new Date(party.ends).toLocaleString()  }
+                    </Badge>
+                </Stack>
+                <Stack direction={'row'} justifyContent={'space-between'}>
+                    <Text>Budget</Text>
+                    <Badge
+                        px={2}
+                        py={1}
+                        bg="gray"
+                        color="white"
+                        fontWeight={'400'}>
+                        { `€ ${party.budget}`  }
                     </Badge>
                 </Stack>
         
-                <Stack mt={8} direction={'row'} spacing={4} justifyContent={'space-between'}>
+                <Stack mt={4} direction={'row'} spacing={4} justifyContent={'space-between'}>
                         <Button
                         flex={1}
                         fontSize={'sm'}
@@ -141,30 +147,11 @@ const Parties = () => {
                         Share
                         </Button>
                     <Form>
-                        <Button
-                        onClick={() => {
-                            setActiveParty(party);
-                            setStartDate(new Date(party?.starts));
-                            setEndDate(new Date(party?.ends));
-                            setOverlay(<OverlayOne />);
-                            onOpen();
-                        }}
-                        type='submit'
-                        flex={1}
-                        fontSize={'sm'}
-                        bg={'blue.400'}
-                        color={'white'}
-                        _hover={{
-                            bg: 'blue.500',
-                        }}
-                        _focus={{
-                            bg: 'blue.500',
-                        }}>
-                        Edit
-                        </Button>
+                        <EditModal party={party} />
                     </Form>
                     <Form>
                         <Button
+                        onClick={() => {onOpen(); setActiveParty(party)}}
                         type='submit'
                         flex={1}
                         fontSize={'sm'}
@@ -182,25 +169,274 @@ const Parties = () => {
                 </Stack>
                 </Box>
             }) : <div>No parties</div>}
+            </ SimpleGrid>
             <div>
             </div>
         </div>
         </div>
-        <Modal isCentered isOpen={isOpen} onClose={onClose}>
+        <AlertDialog
+            motionPreset='slideInBottom'
+            leastDestructiveRef={cancelRef}
+            onClose={onClose}
+            isOpen={isOpen}
+            isCentered
+        >
+            <AlertDialogOverlay />
+
+            <AlertDialogContent>
+            <AlertDialogHeader>Delete party?</AlertDialogHeader>
+            <AlertDialogCloseButton />
+            <AlertDialogBody>
+                Are you sure you want to delete this party?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onClose}>
+                No
+                </Button>
+                <Button onClick={RemoveParty} 
+    bg={'red.400'}
+    color={'white'} ml={3}>
+                Yes
+                </Button>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        <Toaster />
+        </>
+    );
+}
+
+const AddModal = ({}) => {
+        const OverlayOne = () => (
+            <ModalOverlay
+                bg='blackAlpha.300'
+                backdropFilter='blur(10px)'
+            />
+        )
+    
+        const AddParty = async () => {
+    
+            let partyToCreate = {
+                userid: "",
+                title: "",
+                description: "",
+                starts: "",
+                ends: "",
+                budget: ""
+            }
+    
+            partyToCreate.userid = auth?.userid;
+            partyToCreate.title = title;
+            partyToCreate.description = description;
+            partyToCreate.starts = startDate;
+            partyToCreate.ends = endDate; 
+            partyToCreate.budget = budget !== null ? budget : 0;
+    
+            const response = await CreateParty(partyToCreate);
+
+            response?.status == 200 ? toast('Succesfully created party!')  : toast('Error creating party.');
+        }
+    
+        const { auth } = useAuth();
+        const [overlay, setOverlay] = React.useState(<OverlayOne />)
+    
+        // Active party
+        const [title, setTitle] = useState('');
+        const [description, setDescription] = useState('');
+        const [startDate, setStartDate] = useState(new Date());
+        const [endDate, setEndDate] = useState(new Date());
+        const [location, setLocation] = useState('');
+        const [budget, setBudget] = useState(0);
+    
+        const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure()
+    
+        useEffect(() => {
+            // Only when modal is opened
+            if(onAddOpen)
+            {
+                setOverlay(<OverlayOne />);
+            }
+    
+        }, [])
+    
+        return (
+        <>
+        
+        <Button
+            onClick={onAddOpen} 
+            bg={'blue.400'}
+            color={'white'}
+            aria-label='Add party'
+            size='md'
+            _hover={{
+                bg: 'blue.500',
+            }}
+            _focus={{
+                bg: 'blue.500',
+            }}>+</Button>
+        <Modal isCentered isOpen={isAddOpen} onClose={onAddClose}>
+            {overlay}
+                <ModalContent>
+                    <ModalHeader>Party information
+                    </ModalHeader>
+                    <ModalBody>
+                    <InputGroup mb={4}>
+                        <InputLeftAddon children='Party title' />
+                        <Input placeholder='e.g. New years party at Tommie' onChange={((e) => {
+                            setTitle(e.target.value);
+                        })} type='text' />
+                    </InputGroup>
+                    <Textarea
+                        onChange={((e) => {
+                            setDescription(e.target.value);
+                        })}
+                        placeholder='e.g. bring your best christmas clothing!'
+                        size='sm'
+                    />
+                    <Divider my={4} />
+                    <FormControl>
+                        <FormLabel>Partys starts at</FormLabel>
+                        <DatePicker
+                            showIcon
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            showTimeSelect
+                            timeFormat="HH:mm"
+                            timeIntervals={15}
+                            timeCaption="time"
+                            dateFormat="MMMM d, yyyy h:mm aa"
+                        />
+                    </FormControl>
+                    <FormControl my={4}>
+                        <FormLabel>Ends at</FormLabel>
+                        <DatePicker
+                            showIcon
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            showTimeSelect
+                            timeFormat="HH:mm"
+                            timeIntervals={15}
+                            timeCaption="time"
+                            dateFormat="MMMM d, yyyy h:mm aa"
+                        />
+                    </FormControl>
+                    <Divider mb={4} />
+                    <InputGroup>
+                    
+                        <InputLeftAddon children='Budget €' />
+                        <Input onChange={(e) => {
+                            setBudget(parseInt(e.target.value));
+                         }} placeholder='Enter party budget' />
+                        <InputRightElement>
+                            <CheckIcon color='green.500' />
+                        </InputRightElement>
+                    </InputGroup>
+                </ModalBody>
+                <ModalFooter>
+                    <Button flex={1}
+                            fontSize={'sm'}
+                            bg={'blue.400'}
+                            color={'white'}
+                            _hover={{
+                                bg: 'blue.500',
+                            }}
+                            _focus={{
+                                bg: 'blue.500',
+                            }} onClick={AddParty}>Create</Button>
+                    <Button 
+                            ml={4} onClick={onAddClose}>Close</Button>
+                </ModalFooter>
+                </ModalContent>
+            </Modal>
+            </>);
+}
+
+const EditModal = ({party}) => {
+    
+    const OverlayOne = () => (
+        <ModalOverlay
+            bg='blackAlpha.300'
+            backdropFilter='blur(10px)'
+        />
+    )
+
+    const DefaultValuesForParty = () => {
+        setTitle(party?.title);
+        setDescription(party?.description);
+
+        console.log(party?.starts);
+        setStartDate(new Date(party?.starts));
+        setEndDate(new Date(party?.ends));
+        setBudget(party?.budget);
+        setLocation(party?.location);
+    }
+
+    const SaveParty = async () => {
+        let partyToUpdate = party;
+
+        partyToUpdate.title = title;
+        partyToUpdate.description = description;
+        partyToUpdate.starts = startDate;
+        partyToUpdate.ends = endDate; 
+        partyToUpdate.budget = budget !== null ? budget : 0;
+        partyToUpdate.location = party?.location;
+
+        const response = await UpdateParty(partyToUpdate);
+    }
+
+    const [overlay, setOverlay] = React.useState(<OverlayOne />)
+
+    // Active party
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
+    const [location, setLocation] = useState('');
+    const [budget, setBudget] = useState(0);
+
+    const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
+
+    useEffect(() => {
+        // Only when modal is opened
+        if(onEditOpen)
+        {
+            DefaultValuesForParty();
+            setOverlay(<OverlayOne />);
+        }
+
+    }, [])
+
+    return (
+    <>
+    <Button
+    onClick={onEditOpen} 
+    type='submit'
+    flex={1}
+    fontSize={'sm'}
+    bg={'blue.400'}
+    color={'white'}
+    _hover={{
+        bg: 'blue.500',
+    }}
+    _focus={{
+        bg: 'blue.500',
+    }}>
+    Edit
+    </Button>
+    <Modal isCentered isOpen={isEditOpen} onClose={onEditClose}>
         {overlay}
             <ModalContent>
                 <ModalHeader>Party information
                 </ModalHeader>
-            <ModalCloseButton />
                 <ModalBody>
                 <InputGroup mb={4}>
                     <InputLeftAddon children='Party title' />
-                    <Input defaultValue={activeParty?.title} onChange={((e) => {
+                    <Input defaultValue={party?.title} onChange={((e) => {
                         setTitle(e.target.value);
                     })} type='text' />
                 </InputGroup>
                 <Textarea
-                    defaultValue={activeParty?.description}
+                    defaultValue={party?.description}
                     onChange={((e) => {
                         setDescription(e.target.value);
                     })}
@@ -238,7 +474,7 @@ const Parties = () => {
                 <InputGroup>
                 
                     <InputLeftAddon children='Party budget €' />
-                    <Input defaultValue={activeParty?.budget} onChange={(e) => {
+                    <Input defaultValue={party?.budget} onChange={(e) => {
                         setBudget(parseInt(e.target.value));
                      }} placeholder='Enter budget' />
                     <InputRightElement>
@@ -258,12 +494,11 @@ const Parties = () => {
                             bg: 'blue.500',
                         }} onClick={SaveParty}>Save</Button>
                 <Button 
-                        ml={4} onClick={onClose}>Close</Button>
+                        ml={4} onClick={onEditClose}>Close</Button>
             </ModalFooter>
             </ModalContent>
         </Modal>
-        </>
-    );
+        </>);
 }
 
 export default Parties;

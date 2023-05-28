@@ -20,7 +20,7 @@ import {
   MenuButton,
   MenuDivider,
   MenuItem,
-  MenuList,
+  MenuList
 } from '@chakra-ui/react';
 import {
   FiCalendar,
@@ -67,7 +67,7 @@ export default function Root({children}) {
         </Drawer>
         {/* mobilenav */}
         <MobileNav onOpen={onOpen} />
-        <Box ml={{ base: 0, md: 60 }} p="4">
+        <Box ml={{ base: 0, md: 60 }} p="4" bg={'#f5f5f5'}>
            <Outlet />
         </Box>
         </Box>
@@ -133,7 +133,6 @@ const NavItem = ({ icon, url, type, children, ...rest }) => {
 
 const MobileNav = ({ onOpen, ...rest }) => {
     const { auth } = useAuth();
-    console.log(auth);
     const { setAuth } = useContext(AuthContext);
     const navigate = useNavigate();
 
