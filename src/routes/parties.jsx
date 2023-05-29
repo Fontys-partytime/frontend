@@ -53,6 +53,11 @@ const Parties = () => {
 
     const RemoveParty = async () => {
         const response = await DeleteParty(activeParty);
+        response?.status == 200 ? response?.data 
+        ? toast('Succesfully deleted party!', { duration: 4000, position: 'bottom-center', type: 'success'}) && setParties(parties.filter(party => party.id !== activeParty.id)) // Remove party from array if deletion is succesful
+        : toast("Party could not be deleted. This might be because you are trying to delete a party that doesn't exist anymore.", { duration: 10000, position: 'bottom-center', type: 'error'})  
+        : toast('Server error deleting party.', { duration: 6000, position: 'bottom-center', type: 'error'});
+        
     }
 
     const { auth } = useAuth();
@@ -193,9 +198,7 @@ const Parties = () => {
                 <Button ref={cancelRef} onClick={onClose}>
                 No
                 </Button>
-                <Button onClick={RemoveParty} 
-    bg={'red.400'}
-    color={'white'} ml={3}>
+                <Button onClick={() => { onClose(); RemoveParty() }} bg={'red.400'} color={'white'} ml={3}>
                 Yes
                 </Button>
             </AlertDialogFooter>
@@ -234,7 +237,9 @@ const AddModal = ({}) => {
     
             const response = await CreateParty(partyToCreate);
 
-            response?.status == 200 ? toast('Succesfully created party!')  : toast('Error creating party.');
+            response?.status == 200 
+            ? toast('Succesfully created party!', { duration: 4000, position: 'bottom-center', type: 'success'})  
+            : toast('Error creating party.', { duration: 6000, position: 'bottom-center', type: 'error'});
         }
     
         const { auth } = useAuth();
@@ -342,7 +347,7 @@ const AddModal = ({}) => {
                             }}
                             _focus={{
                                 bg: 'blue.500',
-                            }} onClick={AddParty}>Create</Button>
+                            }} onClick={() => {onAddClose(); AddParty()}}>Create</Button>
                     <Button 
                             ml={4} onClick={onAddClose}>Close</Button>
                 </ModalFooter>
@@ -382,6 +387,10 @@ const EditModal = ({party}) => {
         partyToUpdate.location = party?.location;
 
         const response = await UpdateParty(partyToUpdate);
+        response?.status == 200 
+        ? toast('Succesfully updated party!', { duration: 4000, position: 'bottom-center', type: 'success'})  
+        : toast('Error updating party.', { duration: 6000, position: 'bottom-center', type: 'error'});
+
     }
 
     const [overlay, setOverlay] = React.useState(<OverlayOne />)
@@ -492,7 +501,7 @@ const EditModal = ({party}) => {
                         }}
                         _focus={{
                             bg: 'blue.500',
-                        }} onClick={SaveParty}>Save</Button>
+                        }} onClick={() => {onEditClose(); SaveParty()}}>Save</Button>
                 <Button 
                         ml={4} onClick={onEditClose}>Close</Button>
             </ModalFooter>
