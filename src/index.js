@@ -17,6 +17,7 @@ import Login from './components/Login';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { AuthProvider } from './context/AuthProvider';
 import RequireAuth from './components/RequireAuth';
+import Party from './routes/party';
 
 // 2. Add your color mode config
 const config = {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "/parties",
         element: (<RequireAuth allowedRoles={["User"]}><Parties /></RequireAuth>),
+      },
+      {
+        path: "/parties/share/:partyid",
+        element: (<RequireAuth allowedRoles={["User"]}><Party /></RequireAuth>),
       }
     ]
   },

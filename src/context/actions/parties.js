@@ -1,6 +1,12 @@
 import axiosPrivate from '../../api/axios';
 import useAuth from '../../hooks/useAuth';
 
+export const GetPartyById = async (partyid) => {
+    const response = await axiosPrivate.get(`/parties/${partyid}`);
+    console.log(response.data);
+    return response;
+}
+
 export const GetPartiesByUserid = async (userid) => {
     const response = await axiosPrivate.get(`/parties/user/${userid}`);
     console.log(response.data);

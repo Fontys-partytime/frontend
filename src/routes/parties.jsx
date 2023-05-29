@@ -36,7 +36,8 @@ import {
     AlertDialogFooter,
     IconButton,
     SimpleGrid,
-    useColorModeValue 
+    useColorModeValue, 
+    HStack
 } from '@chakra-ui/react';
 import { CheckIcon, 
     AddIcon } from '@chakra-ui/icons'
@@ -48,6 +49,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import toast, { Toaster } from 'react-hot-toast';
+
+import { Link as RouterLink } from 'react-router-dom';
 
 const Parties = () => {
 
@@ -141,20 +144,18 @@ const Parties = () => {
                         { `€ ${party.budget}`  }
                     </Badge>
                 </Stack>
+                <HStack mt={3}>
+                    {party?.joined?.length 
+                    ? party.joined?.map((joined, id) => {
+                        return <Avatar name={joined.username} />
+                    }) : <b>No guests yet.</b>}
+                    
+                </HStack>
         
                 <Stack mt={4} direction={'row'} spacing={4} justifyContent={'space-between'}>
-                        <Button
-                        flex={1}
-                        fontSize={'sm'}
-                        _focus={{
-                            bg: 'gray.200',
-                        }}>
-                        Share
-                        </Button>
-                    <Form>
+                <Link as={RouterLink} to={`/parties/share/${party.id}`} style={{ textDecoration: 'none' }} 
+                _focus={{ boxShadow: 'none' }}>Share</Link>
                         <EditModal party={party} />
-                    </Form>
-                    <Form>
                         <Button
                         onClick={() => {onOpen(); setActiveParty(party)}}
                         type='submit'
@@ -170,7 +171,6 @@ const Parties = () => {
                         }}>
                         Delete
                         </Button>
-                    </Form>
                 </Stack>
                 </Box>
             }) : <div>No parties</div>}
