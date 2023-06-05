@@ -1,5 +1,7 @@
 import axios from 'axios';
-const BASE_URL = "http://localhost:8001/api";
+import env from "react-dotenv";
+
+const BASE_URL = env.BACKEND_URL;
 
 export default axios.create({
     baseURL: BASE_URL
