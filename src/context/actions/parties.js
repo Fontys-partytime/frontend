@@ -32,3 +32,13 @@ export const DeleteParty = async (party) => {
     console.log(response.data);
     return response;
 }
+
+export const JoinPartyByPartyIdAndUserId = async (partyId, userId, username) => {
+    const response = await axiosPrivate.post(`/joined`, {
+        partyid: partyId,
+        userid: userId,
+        username: username
+    });
+    console.log(response.data);
+    return response;
+}

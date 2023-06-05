@@ -38,13 +38,18 @@ import {
     SimpleGrid,
     useColorModeValue, 
     HStack,
-    VStack
+    VStack,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverArrow
+
 } from '@chakra-ui/react';
 import { CheckIcon, 
     AddIcon } from '@chakra-ui/icons'
 
 import useAuth from '../hooks/useAuth';
-import { GetPartyById } from '../context/actions/parties';
+import { GetPartyById, JoinPartyByPartyIdAndUserId } from '../context/actions/parties';
 import '../css/datepicker.css'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -54,11 +59,16 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
 const Party = () => {
-
-    const JoinParty = () => {
-        
+    
+    const JoinParty = async () => {
+        console.log(auth);
+        const response = await JoinPartyByPartyIdAndUserId(party.id, auth?.userid, auth?.user)
+        response?.status == 200 
+        ? toast('Succesfully joined party!', { duration: 4000, position: 'bottom-center', type: 'success'})  
+        : toast('Error joining party.', { duration: 6000, position: 'bottom-center', type: 'error'});
     }
 
+    const { auth } = useAuth();
     const [party, setParty] = useState({});
     const { isOpen, onOpen, onClose } = useDisclosure()
     const cancelRef = React.useRef()
@@ -78,7 +88,7 @@ const Party = () => {
     return (
         <>
         <div id="party">
-        <div style={{marginLeft: "2rem"}}>
+        <Center style={{marginLeft: "2rem"}}>
             {Object.keys(party).length !== 0 ? <Box
                 bg="white"
                 w={'full'}
@@ -144,9 +154,19 @@ const Party = () => {
                         }}>
                         Join
                     </Button>
-                    <Text pl={2}>{party?.joined?.length 
+                    <Divider pt={3} />
+                    <Text pt={3} pl={2}>
+                        {party?.joined?.length 
                     ? party.joined?.map((joined, id) => {
-                        return <Avatar name={joined.username} />
+                        return <Popover trigger="hover">
+                        <PopoverTrigger>
+                            <Avatar name={joined.username} />
+                        </PopoverTrigger>
+                        <PopoverContent py={3}>
+                            <PopoverArrow />
+                            <Center>{joined.username}</Center>
+                        </PopoverContent>
+                        </Popover>
                     }) : <b>No other guests yet.</b>}</Text>
                     
                 </VStack>
@@ -154,7 +174,7 @@ const Party = () => {
              : <div>Party could not be found.</div>}
             <div>
             </div>
-        </div>
+        </Center>
         </div>
         <AlertDialog
             motionPreset='slideInBottom'

@@ -37,7 +37,11 @@ import {
     IconButton,
     SimpleGrid,
     useColorModeValue, 
-    HStack
+    HStack,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverArrow,
 } from '@chakra-ui/react';
 import { CheckIcon, 
     AddIcon } from '@chakra-ui/icons'
@@ -144,22 +148,47 @@ const Parties = () => {
                         { `€ ${party.budget}`  }
                     </Badge>
                 </Stack>
-                <HStack mt={3}>
+                
+                <Divider pt={3} />
+                <HStack mt={3} pb={3}>
                     {party?.joined?.length 
                     ? party.joined?.map((joined, id) => {
-                        return <Avatar name={joined.username} />
+                        return <Popover trigger="hover">
+                        <PopoverTrigger>
+                            <Avatar name={joined.username} />
+                        </PopoverTrigger>
+                        <PopoverContent py={3}>
+                            <PopoverArrow />
+                            <Center>{joined.username}</Center>
+                        </PopoverContent>
+                        </Popover>
                     }) : <b>No guests yet.</b>}
                     
                 </HStack>
         
+                <Divider pt={3} />
                 <Stack mt={4} direction={'row'} spacing={4} justifyContent={'space-between'}>
-                <Link as={RouterLink} to={`/parties/share/${party.id}`} style={{ textDecoration: 'none' }} 
-                _focus={{ boxShadow: 'none' }}>Share</Link>
+                <Link flex={1}
+                        fontSize={'sm'}
+                        bg={'white.400'}
+                        color={'#555'}
+                        border={'1px'}
+                        borderColor={'lightgray'}
+                        rounded={'md'}
+                        display={'flex'}
+                        fontWeight={600}
+                        justifyContent={'center'}
+                        alignItems={'center'}
+                        _hover={{
+                            bg: 'white.500',
+                        }}
+                        _focus={{
+                            bg: 'white.500',
+                        }} as={RouterLink} to={`/parties/share/${party.id}`} style={{ textDecoration: 'none' }} >Share</Link>
                         <EditModal party={party} />
                         <Button
                         onClick={() => {onOpen(); setActiveParty(party)}}
                         type='submit'
-                        flex={1}
                         fontSize={'sm'}
                         bg={'red.400'}
                         color={'white'}
@@ -420,7 +449,6 @@ const EditModal = ({party}) => {
     <Button
     onClick={onEditOpen} 
     type='submit'
-    flex={1}
     fontSize={'sm'}
     bg={'blue.400'}
     color={'white'}
@@ -481,7 +509,6 @@ const EditModal = ({party}) => {
                 </FormControl>
                 <Divider mb={4} />
                 <InputGroup>
-                
                     <InputLeftAddon children='Party budget €' />
                     <Input defaultValue={party?.budget} onChange={(e) => {
                         setBudget(parseInt(e.target.value));
