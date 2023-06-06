@@ -3,12 +3,12 @@ import axios from 'axios';
 // Different endpoints if local or production
 const prod = {
     url: {
-        BACKEND_URL: 'www.partytime.com/apigateway/api'
+        BACKEND_URL: 'www.partytime.com/api'
     }
 }
 const dev = {
     url: {
-        BACKEND_URL: 'http://localhost:8001/api'
+        BACKEND_URL: 'http://localhost:8001/'
     }
 };
 
