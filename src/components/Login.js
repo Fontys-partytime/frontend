@@ -18,7 +18,7 @@ import {
   } from '@chakra-ui/react';
 
 import axios from '../api/axios';
-const LOGIN_URL = process.env.NODE_ENV === 'development' ? '/account'  : '/api/account';
+const LOGIN_URL = process.env.NODE_ENV === 'development' ? '/api/account'  : '/api/account';
 
 
 const Login = () => {
