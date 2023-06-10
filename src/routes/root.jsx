@@ -39,9 +39,9 @@ import useAuth from "../hooks/useAuth";
 
 const LinkItems = [
   { name: 'Your parties', icon: FiCalendar, url: "/parties" },
-  { name: 'Joined parties', icon: FiUserPlus, url: "/parties/joined"  },
-  { name: 'Messages', icon: FiMail, url: "/messages" },
-  { name: 'Settings', icon: FiSettings, url: "/settings" }
+  // { name: 'Joined parties', icon: FiUserPlus, url: "/parties/joined"  },
+  // { name: 'Messages', icon: FiMail, url: "/messages" },
+  // { name: 'Settings', icon: FiSettings, url: "/settings" }
 ];
 
 export default function Root({children}) {

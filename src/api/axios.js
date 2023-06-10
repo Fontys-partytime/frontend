@@ -2,19 +2,16 @@ import axios from 'axios';
 
 // Different endpoints if local or production
 const prod = {
-    url: {
-        BACKEND_URL: 'www.partytime.com/api'
-    }
+    BACKEND_URL: 'http://www.partytime.com/api'
 }
 const dev = {
-    url: {
-        BACKEND_URL: 'http://localhost:8001/'
-    }
+    BACKEND_URL: 'http://localhost:8001/'
 };
 
 const config = process.env.NODE_ENV === 'development' ? dev : prod;
 
 const BASE_URL = config.BACKEND_URL;
+console.log(BASE_URL);
 
 export default axios.create({
     baseURL: BASE_URL
