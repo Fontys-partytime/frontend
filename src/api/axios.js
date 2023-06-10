@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Different endpoints if local or production
 const prod = {
-    BACKEND_URL: 'http://www.partytime.com/api'
+    BACKEND_URL: 'http://www.partytime.com/api/'
 }
 const dev = {
     BACKEND_URL: 'http://localhost:8001/'
