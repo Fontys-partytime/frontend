@@ -18,7 +18,7 @@ import {
   } from '@chakra-ui/react';
 
 import axios from '../api/axios';
-const LOGIN_URL = '/account'; // Fixed?
+const LOGIN_URL = '/account'; // Fixed2?
 
 
 const Login = () => {
