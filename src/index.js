@@ -13,6 +13,7 @@ import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import Parties from "./routes/parties";
 import Login from './components/Login';
+import Register from './components/Register';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { AuthProvider } from './context/AuthProvider';
@@ -49,6 +50,11 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
     errorElement: <ErrorPage />,
   }
 ]);

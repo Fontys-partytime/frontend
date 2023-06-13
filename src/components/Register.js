@@ -19,7 +19,7 @@ import {
   } from '@chakra-ui/react';
 
 import axios from '../api/axios';
-const LOGIN_URL = '/account'; // Fixed2?
+const LOGIN_URL = '/account/create'; // Fixed2?
 
 
 const Login = () => {
@@ -29,14 +29,14 @@ const Login = () => {
     const location = useLocation();
     
     const toast = useToast()
-    const from = location.state?.from?.pathname || "/";
-    const fromRegister = "/register";
+    const from = location.state?.from?.pathname || "/login";
 
     const userRef = useRef();
     const errRef = useRef();
 
     const [user, setUser] = useState('');
     const [pwd, setPwd] = useState('');
+    const [email, setEmail] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
     useEffect(() => {
@@ -57,8 +57,8 @@ const Login = () => {
         });
     }
 
-    const navigateToRegisterPage = () => {
-        navigate(fromRegister, { replace: true });
+    const navigateToLoginPage = () => {
+        navigate(from, { replace: true });
     }
 
     const handleSubmit = async (e) => {
@@ -66,33 +66,23 @@ const Login = () => {
 
         try {
             const response = await axios.post(LOGIN_URL,
-                JSON.stringify({ "Username": user, "Password": pwd }),
+                JSON.stringify({ "Username": user, "Password": pwd, "Email": email }),
                 {
                     headers: { 'Content-Type': 'application/json' },
                     withCredentials: true
                 }
             );
-            console.log(JSON.stringify(response?.data));
-            //console.log(JSON.stringify(response));
-            const accessToken = response?.data?.jwtToken;
-            const role = response?.data?.role;
-            const email = response?.data?.email;
-            const userid = response?.data?.userid;
-
-            setAuth({ userid, email, user, pwd, role, accessToken });
-            setUser('');
-            setPwd('');
             navigate(from, { replace: true });
         } catch (err) {
             if (!err?.response) {
-                ToastExample("Server error", "No connection to the server.", "error");
+                ToastExample("Server error", err.toString(), "error");
             } else if (err.response?.status === 400) {
-                ToastExample("Validation error", "Missing Username or Password", "warning");
+                ToastExample("Validation error", "You didn't specificy the right data.", "warning");
             } else if (err.response?.status === 401) {
-                ToastExample("Account error", "Account and password combination could not be found", "error");
+                ToastExample("Account error", "Authentication error.", "error");
             } else {
-                setErrMsg('Login Failed');
-                ToastExample("Login error", "The login failed for some unexpected reason.", "error");
+                setErrMsg('Registration Failed');
+                ToastExample("Registration error", "The Registration failed for some unexpected reason.", "error");
             }
         }
     }
@@ -105,7 +95,7 @@ const Login = () => {
             bg={useColorModeValue('gray.50', 'gray.800')}>
             <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
             <Stack align={'center'}>
-                <Heading fontSize={'4xl'}>Sign in to Partytime 🥳</Heading>
+                <Heading fontSize={'4xl'}>Register for Partytime 🎉</Heading>
             </Stack>
             <Box
                 rounded={'lg'}
@@ -114,9 +104,14 @@ const Login = () => {
                 p={8}>
                 <Form onSubmit={handleSubmit}>
                 <Stack spacing={4}>
-                    <FormControl id="email">
+                    <FormControl id="username">
                         <FormLabel>Username</FormLabel>
                         <Input autoComplete="off" value={user} ref={userRef} onChange={(e) => setUser(e.target.value)} type="text" required/>
+                    </FormControl>
+                    
+                    <FormControl id="email">
+                        <FormLabel>Email</FormLabel>
+                        <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
                     </FormControl>
                     <FormControl id="password">
                         <FormLabel>Password</FormLabel>
@@ -138,10 +133,10 @@ const Login = () => {
                     _hover={{
                         bg: 'blue.500',
                     }}>
-                    Sign in
+                    Create
                     </Button>
                     <Button
-                    onClick={navigateToRegisterPage}
+                    onClick={navigateToLoginPage}
                     w={'100%'}
                     type='button'
                     bg={'gray.400'}
@@ -149,7 +144,7 @@ const Login = () => {
                     _hover={{
                         bg: 'gray.500',
                     }}
-                    >Register</Button>
+                    >Back to login</Button>
                 </HStack>
                 </Stack>
                 </Form>
